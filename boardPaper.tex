@@ -1,0 +1,52 @@
+% Document encoding: ISO 8859-1
+\documentclass{standalone}
+
+\usepackage[latin1]{inputenc}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{ifthen}
+
+% CONFIGURE THE BOARD
+
+% strength of the drawn lines in percent (0: white, 50: medium gray, 100: black)
+\def\strength{20}
+
+% grid and PCB size
+\pgfmathsetmacro{\raster}{2.54mm}
+\pgfmathsetmacro{\pcbLength}{160mm}
+\pgfmathsetmacro{\pcbWidth}{100mm}
+
+% do you want stripboard or perfboard?
+\newboolean{strips}
+\setboolean{strips}{true} % set to false for perfboard
+
+% radius of the pads
+\def\padRadius{0.5mm}
+
+% don't edit the following unless you know what you're doing
+\pgfmathsetmacro{\nx}{floor(\pcbLength/\raster) - 1}
+\pgfmathsetmacro{\ny}{floor(\pcbWidth/\raster) - 1}
+
+\pgfmathsetmacro{\startX}{(\pcbLength - \nx*\raster)/2}
+\pgfmathsetmacro{\startY}{(\pcbWidth - \ny*\raster)/2}
+
+\begin{document}
+  \begin{tikzpicture}
+    \begin{scope}[thick, black!\strength]
+    \foreach \row in {0,...,\ny}
+    {
+      \pgfmathsetmacro{\py}{\startY + \row*\raster}
+      \pgfmathsetmacro{\endX}{\pcbLength - \startX}
+      \ifthenelse{\boolean{strips}}{\draw (\startX pt, \py pt) -- (\endX pt, \py pt);}{}
+      \foreach \col in {0,...,\nx}
+      {
+        \pgfmathsetmacro{\px}{\startX + \col*\raster}
+        \fill[white] (\px pt, \py pt) circle(\padRadius);
+        \draw (\px pt, \py pt) circle(\padRadius);
+      }
+    }
+    \end{scope}
+    \draw (0,0) rectangle (\pcbLength pt,\pcbWidth pt);
+  \end{tikzpicture}
+\end{document}
